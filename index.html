@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🔱 G-GHOST | V23 ULTRA-STRIKE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root { --yt-red: #FF0000; --bg: #0b0b0b; --card: #161616; --text: #ffffff; --neon: #42FDFC; --gold: #FFD700; --live: #00ff41; --dead: #ff3131; }
+        body { background: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; margin: 0; padding-bottom: 150px; overflow-x: hidden; }
+        
+        .app-bar { background: var(--bg); padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #222; }
+        .logo { font-size: 18px; font-weight: bold; color: var(--neon); letter-spacing: -1px; }
+        
+        #active-task-bar { background: #1a1a1a; padding: 8px 15px; border-bottom: 1px solid var(--neon); display: flex; font-size: 10px; color: var(--neon); font-weight: bold; justify-content: space-between; }
+
+        #video-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; padding: 12px; }
+        .video-card { position: relative; background: var(--card); border-radius: 12px; overflow: hidden; border: 2px solid #222; transition: 0.2s; }
+        .video-card.selected { border-color: var(--neon); box-shadow: 0 0 15px var(--neon); }
+        
+        /* 🔱 Looted History Style */
+        .video-card.is-looted { opacity: 0.5; filter: grayscale(1); }
+        .video-card.is-looted::after { content: "SECURED"; position: absolute; top: 8px; left: 8px; background: var(--live); color: #000; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 4px; z-index: 20; }
+
+        .thumb-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; cursor: pointer; }
+        .thumb-img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* 👁️ Control Buttons Over Thumb */
+        .card-actions { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 5px; z-index: 10; }
+        .mini-btn { background: rgba(0,0,0,0.85); color: var(--neon); border: 1px solid var(--neon); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .mini-btn:active { transform: scale(1.2); background: var(--neon); color: #000; }
+        .btn-dl { color: var(--gold); border-color: var(--gold); }
+
+        .video-meta { padding: 8px; font-size: 10px; color: #eee; height: 35px; overflow: hidden; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+        
+        .full-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 3000; display: none; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        #progress-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 4000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .pg-bar { width: 80%; background:#222; height:10px; border-radius:10px; overflow:hidden; margin: 20px 0; border: 1px solid #333; }
+        .pg-fill { width: 0%; height: 100%; background: var(--neon); transition: 0.4s; box-shadow: 0 0 20px var(--neon); }
+        
+        .btn-main { background: var(--neon); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; margin-bottom: 8px; text-transform: uppercase; }
+        .btn-stop { background: var(--dead); color: #fff; display: none; }
+
+        #player-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; align-items: center; justify-content: center; flex-direction: column; }
+        #player-modal video { width: 95%; max-height: 70vh; border-radius: 10px; box-shadow: 0 0 30px var(--neon); }
+        
+        .search-container { padding: 10px; background: #000; }
+        #search-input { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; outline: none; box-sizing: border-box; }
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="app-bar">
+    <div class="logo">🔱 G-GHOST <span style="color:var(--gold); font-size:10px;">V23 TURBO</span></div>
+    <div style="display:flex; gap:15px;">
+        <button onclick="toggleSearch()" style="background:none; border:none; color:white; font-size:20px;">🔍</button>
+        <button onclick="openOverlay('queue-overlay')" style="background:none; border:none; color:white; font-size:20px;">📥 <span id="q-count" style="font-size:12px; color:var(--neon); font-weight:bold;">0</span></button>
+    </div>
+</div>
+
+<div id="active-task-bar">
+    <span id="node-stat">📡 TURBO ENGINE: READY</span>
+    <span id="total-count" style="color:var(--gold)">0 ASSETS</span>
+</div>
+
+<div id="search-box" class="search-container" style="display:none;">
+    <input type="text" id="search-input" placeholder="Search prompts..." oninput="renderView()">
+</div>
+
+<div id="video-feed"></div>
+
+<div id="progress-overlay">
+    <h2 id="pg-title" style="color:white; letter-spacing:2px;">🔱 FORCE TURBO LOOTING</h2>
+    <div class="pg-bar"><div id="pg-fill" class="pg-fill"></div></div>
+    <div id="pg-percent" style="font-size:45px; color:var(--neon); font-weight:900;">0%</div>
+    <p id="pg-status" style="font-size:11px; color:var(--gold); font-family:monospace; margin-bottom: 20px;"></p>
+    <button id="stop-purge-btn" class="btn-main btn-stop" onclick="stopProcess()">🛑 ABORT OPERATION</button>
+</div>
+
+<div id="queue-overlay" class="full-overlay">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #222; padding-bottom:10px;">
+        <h2 style="color:var(--neon)">Extraction Queue</h2>
+        <button onclick="closeOverlay('queue-overlay')" style="background:#222; color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:bold;">BACK</button>
+    </div>
+    <div id="queue-list" style="margin-bottom:20px;"></div>
+    <button class="btn-main" style="background:linear-gradient(90deg, #ff8c00, #ff4500);" onclick="downloadZipTurbo()">🚀 FORCE TURBO ZIP & AUTO-PURGE</button>
+    <button class="btn-main" style="background:#111; color:#555;" onclick="clearQueue()">RESET SELECTION</button>
+</div>
+
+<div id="player-modal">
+    <button onclick="closePlayer()" style="position:absolute; top:20px; right:20px; background:none; color:white; border:2px solid white; border-radius:50%; width:40px; height:40px; font-weight:900; z-index:100;">X</button>
+    <video id="ghost-player" controls autoplay></video>
+    <p id="player-meta" style="padding:20px; color:#aaa; font-size:12px; text-align:center;"></p>
+</div>
+
+<script>
+    const FB_URL = "https://hat-e9d2d-default-rtdb.firebaseio.com/sora_vault";
+    let masterData = [];
+    let queue = [];
+    let abortCurrentProcess = false;
+    // 🔱 Tracking looted items locally to avoid re-downloading
+    let lootedHistory = JSON.parse(localStorage.getItem('ghost_looted_v23')) || [];
+
+    async function refreshData() {
+        try {
+            const res = await fetch(`${FB_URL}.json?nocache=${Date.now()}`);
+            const data = await res.json();
+            if(!data) return;
+            let tempStore = [];
+            function deepSearch(obj, path = "") {
+                for (let key in obj) {
+                    let item = obj[key];
+                    let currentPath = path ? `${path}/${key}` : key;
+                    if (item && typeof item === 'object') {
+                        if (item.clean || item.original_url) {
+                            tempStore.push({
+                                id: key,
+                                dbPath: currentPath,
+                                clean: item.clean || item.original_url,
+                                thumb: item.thumb || item.thumbnailUrl || 'https://via.placeholder.com/150/000/fff?text=No_Thumb',
+                                prompt: item.prompt || 'Untitled_Asset',
+                                time: item.timestamp || item.time || 0
+                            });
+                        } else deepSearch(item, currentPath);
+                    }
+                }
+            }
+            deepSearch(data);
+            const unique = [];
+            const map = new Map();
+            for (const item of tempStore) {
+                if(!map.has(item.clean)){ map.set(item.clean, true); unique.push(item); }
+            }
+            masterData = unique.sort((a,b) => b.time - a.time);
+            document.getElementById('total-count').innerText = masterData.length + " ASSETS";
+            renderView();
+        } catch (e) {}
+    }
+
+    function renderView() {
+        const query = document.getElementById('search-input').value.toLowerCase();
+        const feed = document.getElementById('video-feed');
+        let filtered = query ? masterData.filter(i => i.prompt.toLowerCase().includes(query)) : masterData;
+        feed.innerHTML = "";
+        filtered.forEach(item => {
+            const isSelected = queue.some(q => q.id === item.id);
+            const isLooted = lootedHistory.includes(item.id);
+            const card = document.createElement('div');
+            card.className = `video-card ${isSelected ? 'selected' : ''} ${isLooted ? 'is-looted' : ''}`;
+            card.innerHTML = `
+                <div class="thumb-container" onclick="toggleSelect('${item.id}')">
+                    <img class="thumb-img" src="${item.thumb}" loading="lazy">
+                    <div class="card-actions">
+                        <div class="mini-btn" onclick="openPlayer(event, '${item.clean}', '${item.prompt}')">👁️</div>
+                        <div class="mini-btn btn-dl" onclick="individualDownload(event, '${item.clean}', '${item.prompt}')">📥</div>
+                    </div>
+                </div>
+                <div class="video-meta">${item.prompt}</div>
+            `;
+            feed.appendChild(card);
+        });
+    }
+
+    function toggleSelect(id) {
+        const item = masterData.find(m => m.id === id);
+        const idx = queue.findIndex(q => q.id === id);
+        if(idx > -1) queue.splice(idx, 1); else queue.push(item);
+        document.getElementById('q-count').innerText = queue.length;
+        renderView();
+        renderQueueList();
+    }
+
+    function renderQueueList() {
+        document.getElementById('queue-list').innerHTML = queue.map(i => `<div style="background:#111; padding:8px; margin-bottom:5px; font-size:10px; border-left:2px solid var(--neon)">${i.prompt.substring(0,40)}...</div>`).join('');
+    }
+
+    // 🔱 INDIVIDUAL DOWNLOAD
+    function individualDownload(e, url, prompt) {
+        e.stopPropagation();
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${prompt.substring(0,20)}.mp4`;
+        link.target = "_blank";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function openPlayer(e, url, prompt) {
+        e.stopPropagation();
+        const modal = document.getElementById('player-modal');
+        const video = document.getElementById('ghost-player');
+        video.src = url;
+        document.getElementById('player-meta').innerText = prompt;
+        modal.style.display = 'flex';
+    }
+    function closePlayer() {
+        const video = document.getElementById('ghost-player');
+        video.pause(); video.src = "";
+        document.getElementById('player-modal').style.display = 'none';
+    }
+
+    function stopProcess() { 
+        abortCurrentProcess = true; 
+        document.getElementById('pg-status').innerText = "🛑 ABORTING OPERATION...";
+    }
+
+    // 🔱 MASTER TURBO ZIP & SMART LOOT ENGINE
+    async function downloadZipTurbo() {
+        if(queue.length === 0) return;
+        abortCurrentProcess = false;
+        const zip = new JSZip();
+        const overlay = document.getElementById('progress-overlay');
+        const fill = document.getElementById('pg-fill');
+        const status = document.getElementById('pg-status');
+        const stopBtn = document.getElementById('stop-purge-btn');
+        
+        overlay.style.display = 'flex';
+        stopBtn.style.display = 'block';
+        closeOverlay('queue-overlay');
+
+        const newlyLooted = [];
+        const concurrentLimit = 5; // 🔱 FORCE TURBO: 5-5 एक साथ
+
+        for(let i=0; i < queue.length; i += concurrentLimit) {
+            if(abortCurrentProcess) break;
+            
+            const batch = queue.slice(i, i + concurrentLimit);
+            status.innerText = `FORCE FETCHING BATCH: ${i+1} - ${Math.min(i+concurrentLimit, queue.length)}`;
+
+            await Promise.all(batch.map(async (item, index) => {
+                try {
+                    const response = await fetch(item.clean, { method: 'GET' });
+                    if(!response.ok) throw "DEAD";
+                    
+                    const blob = await response.blob();
+                    if(blob.size < 2000) throw "CORRUPT";
+
+                    // 🔱 SUCCESS: Add to zip and mark as looted
+                    const fileName = `${item.prompt.substring(0,15).replace(/[^a-z0-9]/gi, '_')}_${item.id.substring(0,4)}.mp4`;
+                    zip.file(fileName, blob);
+                    newlyLooted.push(item.id);
+
+                } catch (e) { 
+                    console.log(`Link Failed: ${item.id}`);
+                    status.innerText = `🔥 DEAD LINK DETECTED! PURGING...`;
+                    // Auto-Purge from DB
+                    try {
+                        await fetch(`${FB_URL}/${item.dbPath}.json`, { method: 'DELETE' });
+                    } catch(err) {}
+                }
+            }));
+
+            // Update Progress Bar
+            let p = Math.round((Math.min(i + concurrentLimit, queue.length) / queue.length) * 100);
+            fill.style.width = p + '%';
+            document.getElementById('pg-percent').innerText = p + '%';
+        }
+
+        if(newlyLooted.length > 0 && !abortCurrentProcess) {
+            status.innerText = "🔱 PACKING TURBO ZIP...";
+            const content = await zip.generateAsync({type:"blob", compression: "STORE"});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = `GHOST_TURBO_VAULT_${Date.now()}.zip`;
+            link.click();
+            
+            // 🔱 Mark only successful ones as Looted
+            lootedHistory = [...new Set([...lootedHistory, ...newlyLooted])];
+            localStorage.setItem('ghost_looted_v23', JSON.stringify(lootedHistory));
+            
+            alert(`🔱 OPERATION SUCCESS!\nLooted: ${newlyLooted.length}\nPurged/Failed: ${queue.length - newlyLooted.length}`);
+        }
+
+        overlay.style.display = 'none';
+        stopBtn.style.display = 'none';
+        clearQueue();
+        refreshData();
+    }
+
+    function clearQueue() { queue = []; document.getElementById('q-count').innerText = "0"; renderView(); }
+    function toggleSearch() { 
+        const s = document.getElementById('search-box'); 
+        s.style.display = s.style.display==='none'?'block':'none'; 
+        if(s.style.display==='block') document.getElementById('search-input').focus();
+    }
+    function openOverlay(id) { document.getElementById(id).style.display = 'block'; }
+    function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
+
+    setInterval(refreshData, 30000);
+    refreshData();
+</script>
+</body>
+</html>
