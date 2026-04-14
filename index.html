@@ -3,198 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🔱 G-GHOST | V30 ETERNAL-STRIKE</title>
+    <title>🔱 G-GHOST | V30 SERIAL-STRIKER</title>
     <style>
         :root { 
-            --bg: #050505; --card: #111; --text: #ffffff; 
-            --neon: #00f2ff; --gold: #FFD700; --live: #00ff41; 
-            --dead: #ff3131; --guardian: #ffae00; 
+            --bg: #030303; --card: #0d0d0d; --text: #ffffff; 
+            --neon: #00f2ff; --bomb: #bc13fe; --gold: #FFD700; 
+            --live: #00ff41; --dead: #ff3131; --warn: #ffae00; 
         }
         
         body { 
             background: var(--bg); color: var(--text); 
             font-family: 'Segoe UI', Roboto, sans-serif; 
-            margin: 0; padding-bottom: 120px; 
+            margin: 0; padding-bottom: 150px; 
             overflow-x: hidden; -webkit-tap-highlight-color: transparent; 
         }
 
-        /* 🔱 Animations */
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        @keyframes glow { 0% { box-shadow: 0 0 5px var(--neon); } 50% { box-shadow: 0 0 20px var(--neon); } 100% { box-shadow: 0 0 5px var(--neon); } }
+        /* 🔱 Glow & Animations */
+        @keyframes pulse-glow { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .guardian-active { animation: pulse-glow 2s infinite; color: var(--warn); }
 
+        /* 🔱 Header & Status Bars */
         .app-bar { 
-            background: rgba(0,0,0,0.95); padding: 15px; 
+            background: rgba(0,0,0,0.9); padding: 15px; 
             display: flex; align-items: center; justify-content: space-between; 
             position: sticky; top: 0; z-index: 10000; 
-            border-bottom: 1px solid #222; backdrop-filter: blur(20px); 
+            border-bottom: 1px solid #222; backdrop-filter: blur(15px); 
         }
         .logo { font-size: 20px; font-weight: 900; color: var(--neon); text-shadow: 0 0 10px var(--neon); }
         
-        #guardian-status-bar { 
-            display: none; background: var(--guardian); color: #000; 
-            padding: 6px 15px; font-size: 11px; font-weight: 900; 
-            text-align: center; letter-spacing: 2px; animation: pulse 2s infinite; 
+        #task-bar { 
+            background: #111; padding: 8px 15px; border-bottom: 1px solid #222; 
+            display: flex; font-size: 11px; color: #777; 
+            justify-content: space-between; font-family: monospace; 
         }
 
-        #active-task-bar { 
-            background: #111; padding: 10px 15px; border-bottom: 1px solid #333; 
-            display: flex; font-size: 11px; color: #888; justify-content: space-between; 
-            font-family: monospace; 
-        }
-        
+        /* 🔱 Control Panel */
         .control-panel { 
-            display: flex; gap: 8px; padding: 12px; overflow-x: auto; 
-            background: #000; border-bottom: 1px solid #222; 
-            position: sticky; top: 60px; z-index: 9000; align-items: center; 
+            display: flex; gap: 10px; padding: 12px; 
+            overflow-x: auto; background: #000; 
+            border-bottom: 1px solid #222; position: sticky; 
+            top: 55px; z-index: 9000; 
         }
-        
         .p-btn { 
-            background: #1a1a1a; color: #fff; border: 1px solid #333; 
-            padding: 12px 20px; border-radius: 12px; font-size: 11px; 
+            background: #151515; color: #fff; border: 1px solid #333; 
+            padding: 10px 18px; border-radius: 10px; font-size: 11px; 
             cursor: pointer; font-weight: bold; white-space: nowrap; 
-            transition: 0.2s; display: flex; align-items: center; gap: 5px; 
+            transition: 0.2s; display: flex; align-items: center; gap: 6px;
         }
-        .p-btn:active { transform: scale(0.9); }
-        
-        .btn-guardian { border: 1px solid var(--guardian); color: var(--guardian); }
-        .btn-guardian.on { background: var(--guardian); color: #000; box-shadow: 0 0 15px var(--guardian); }
+        .p-btn:active { transform: scale(0.95); background: #222; }
         .btn-strike { background: var(--neon); color: #000; border: none; font-weight: 900; }
+        .btn-bomb { border-color: var(--bomb); color: var(--bomb); }
         .btn-danger { border-color: var(--dead); color: var(--dead); }
 
+        /* 🔱 Video Grid */
         #video-feed { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); 
             gap: 15px; padding: 15px; 
         }
         .video-card { 
-            position: relative; background: var(--card); border-radius: 15px; 
-            border: 2px solid #222; overflow: hidden; transition: 0.3s; cursor: pointer; 
+            position: relative; background: var(--card); 
+            border-radius: 14px; border: 2px solid #1a1a1a; 
+            overflow: hidden; transition: 0.3s; 
         }
-        .video-card.selected { border-color: var(--neon); background: #1a1a1a; box-shadow: 0 0 15px rgba(0,242,255,0.2); }
-        .video-card.is-looted { opacity: 0.4; filter: grayscale(1); }
+        .video-card.selected { border-color: var(--neon); background: #111; box-shadow: 0 0 15px rgba(0,242,255,0.2); }
+        .video-card.is-looted { opacity: 0.4; filter: grayscale(0.8); }
 
-        .thumb-container { width: 100%; aspect-ratio: 16/9; background: #000; }
+        .thumb-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; cursor: pointer; }
         .thumb-img { width: 100%; height: 100%; object-fit: cover; }
         
-        .video-meta { padding: 10px; font-size: 10px; color: #bbb; height: 28px; overflow: hidden; }
+        .video-meta { padding: 8px; font-size: 10px; color: #999; height: 32px; overflow: hidden; line-height: 1.2; }
         
+        .badge-looted { 
+            position: absolute; top: 6px; left: 6px; 
+            background: var(--live); color: #000; font-size: 8px; 
+            padding: 2px 6px; border-radius: 4px; font-weight: 900; z-index: 5; 
+        }
+
+        /* 🔱 Progress Overlay */
         #progress-overlay { 
             position: fixed; inset: 0; background: rgba(0,0,0,0.98); 
-            z-index: 30000; display: none; flex-direction: column; 
-            align-items: center; justify-content: center; backdrop-filter: blur(10px); 
+            z-index: 50000; display: none; flex-direction: column; 
+            align-items: center; justify-content: center; backdrop-filter: blur(20px); 
         }
-        .pg-bar { width: 80%; background:#222; height:12px; border-radius:10px; margin: 25px 0; overflow: hidden; }
-        .pg-fill { width: 0%; height: 100%; background: var(--neon); transition: 0.4s; }
+        .pg-bar { width: 85%; background:#1a1a1a; height:8px; border-radius:10px; margin: 25px 0; overflow: hidden; }
+        .pg-fill { width: 0%; height: 100%; background: var(--neon); transition: 0.4s; box-shadow: 0 0 15px var(--neon); }
+        
+        #pg-percent { font-size: 70px; font-weight: 900; color: var(--neon); }
+        #pg-status { font-size: 12px; color: var(--gold); font-family: monospace; text-align: center; max-width: 80%; }
 
-        .badge-looted { 
-            position: absolute; top: 8px; left: 8px; background: var(--live); 
-            color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 900; 
+        .search-box { padding: 10px 15px; background: #000; }
+        #search-input { 
+            width: 100%; background: #111; border: 1px solid #222; 
+            color: #fff; padding: 12px; border-radius: 12px; font-size: 14px;
+            outline: none; box-sizing: border-box;
         }
+
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
-<div id="guardian-status-bar">🛡️ GUARDIAN SYSTEM ACTIVE: PATROLLING VAULTS</div>
-
 <div class="app-bar">
-    <div class="logo">🔱 G-GHOST <span style="font-size:10px; color:var(--gold)">V30 ETERNAL</span></div>
+    <div class="logo">🔱 G-GHOST <span style="font-size:10px; color:var(--gold)">V30 SERIAL</span></div>
     <div style="display:flex; gap:10px;">
-        <button onclick="toggleGuardian()" class="p-btn btn-guardian" id="guardian-btn">🛡️ GUARDIAN</button>
         <button onclick="startSequentialStrike()" class="p-btn btn-strike">🚀 STRIKE (<span id="q-count">0</span>)</button>
     </div>
 </div>
 
-<div id="active-task-bar">
-    <span>📡 SPACE: <span id="current-space-name" style="color:var(--neon)">BOMB-VAULT</span></span>
-    <span id="total-count">0 ASSETS</span>
+<div id="task-bar">
+    <span>🛰️ VAULT: <span id="vault-name" style="color:var(--neon)">BOMB-AA638</span></span>
+    <span id="asset-count" style="color:var(--gold)">0 ASSETS</span>
+</div>
+
+<div class="search-box">
+    <input type="text" id="search-input" placeholder="Search prompts..." oninput="renderView()">
 </div>
 
 <div class="control-panel">
-    <button class="p-btn" onclick="switchSpace()">🔄 SWITCH SPACE</button>
-    <button class="p-btn" onclick="refreshData()">🛰️ SYNC</button>
+    <button class="p-btn" onclick="refreshData()">🔄 SYNC VAULT</button>
     <button class="p-btn" onclick="selectAll()">✅ SELECT ALL</button>
     <button class="p-btn" onclick="clearQueue()">❌ CLEAR</button>
-    <button class="p-btn btn-danger" onclick="cleanDeadLinks()">💀 PURGE DEAD</button>
-    <button class="p-btn" onclick="exportLinks()" style="color:var(--gold);">🔗 EXPORT TXT</button>
+    <button class="p-btn btn-danger" onclick="purgeDeadLinks()">💀 PURGE DEAD</button>
 </div>
 
 <div id="video-feed"></div>
 
 <div id="progress-overlay">
-    <div id="pg-percent" style="font-size:80px; font-weight:900; color:var(--neon);">0%</div>
+    <div id="pg-percent">0%</div>
     <div class="pg-bar"><div id="pg-fill" class="pg-fill"></div></div>
-    <p id="pg-status" style="font-size:14px; color:var(--gold); text-align:center; padding:0 20px; font-family:monospace;"></p>
-    <button class="p-btn btn-danger" style="margin-top:20px; padding:15px 40px;" onclick="abortStrike()">🛑 ABORT MISSION</button>
+    <p id="pg-status">INITIATING SERIAL DOWNLOAD SEQUENCE...</p>
+    <button class="p-btn btn-danger" style="margin-top:30px; padding:15px 40px;" onclick="abortStrike()">🛑 ABORT MISSION</button>
 </div>
 
 <script>
-    const SPACES = [
-        { name: "BOMB-VAULT", url: "https://bomb-aa638-default-rtdb.firebaseio.com/sora_vault", color: "#00f2ff" },
-        { name: "HAT-VAULT", url: "https://hat-e9d2d-default-rtdb.firebaseio.com/sora_vault", color: "#bc13fe" }
-    ];
-
-    let currentSpaceIdx = 0;
+    // 🔱 CONFIGURATION
+    const VAULT_URL = "https://bomb-aa638-default-rtdb.firebaseio.com/sora_vault";
     let masterData = [];
     let queue = [];
-    let isAutoStriking = false;
     let lootedHistory = JSON.parse(localStorage.getItem('ghost_looted_v30')) || [];
-    let guardianActive = false;
+    let isAutoStriking = false;
     let wakeLock = null;
 
-    // 🔱 SYNC DATA FROM FIREBASE
+    // 🔱 DATA ENGINE
     async function refreshData() {
-        const s = SPACES[currentSpaceIdx];
+        const statusText = document.getElementById('asset-count');
+        statusText.innerText = "🛰️ SCANNING...";
         try {
-            const res = await fetch(`${s.url}.json?nocache=${Date.now()}`);
+            const res = await fetch(`${VAULT_URL}.json?nocache=${Date.now()}`);
             const data = await res.json();
-            let temp = [];
-            
+            let tempStore = [];
+
             function traverse(obj, path = "") {
                 for (let key in obj) {
                     let item = obj[key];
                     let curPath = path ? `${path}/${key}` : key;
                     if (item && typeof item === 'object') {
                         const vUrl = item.clean || item.original_url || item.url;
-                        if (vUrl && typeof vUrl === 'string') {
-                            temp.push({ 
-                                id: key, dbPath: curPath, clean: vUrl, 
-                                thumb: item.thumb || item.thumbnailUrl || 'https://via.placeholder.com/300x169/111/333?text=G-GHOST', 
-                                prompt: item.prompt || 'Untitled_Asset', 
-                                time: item.timestamp || 0 
+                        if (vUrl) {
+                            tempStore.push({
+                                id: key,
+                                dbPath: curPath,
+                                clean: vUrl,
+                                thumb: item.thumb || item.thumbnailUrl || 'https://via.placeholder.com/300x169/0d0d0d/333?text=G-GHOST',
+                                prompt: item.prompt || 'Untitled_Asset',
+                                time: item.timestamp || 0
                             });
                         } else traverse(item, curPath);
                     }
                 }
             }
             if(data) traverse(data);
-            masterData = temp.sort((a,b) => b.time - a.time);
-            document.getElementById('total-count').innerText = `${masterData.length} ASSETS FOUND`;
+            masterData = tempStore.sort((a,b) => b.time - a.time);
+            statusText.innerText = `${masterData.length} ASSETS SECURED`;
             renderView();
         } catch (e) {
-            console.error(e);
-            document.getElementById('total-count').innerText = "OFFLINE / ERROR";
+            statusText.innerText = "❌ SYNC ERROR";
         }
     }
 
     function renderView() {
+        const query = document.getElementById('search-input').value.toLowerCase();
         const feed = document.getElementById('video-feed');
         feed.innerHTML = "";
-        masterData.forEach(item => {
+        
+        const filtered = query ? masterData.filter(i => i.prompt.toLowerCase().includes(query)) : masterData;
+
+        filtered.forEach(item => {
             const isSelected = queue.some(q => q.id === item.id);
             const isLooted = lootedHistory.includes(item.id);
+            
             const card = document.createElement('div');
             card.className = `video-card ${isSelected ? 'selected' : ''} ${isLooted ? 'is-looted' : ''}`;
             card.onclick = () => toggleSelect(item.id);
             card.innerHTML = `
-                ${isLooted ? '<div class="badge-looted">SECURED</div>' : ''}
-                <div class="thumb-container"><img class="thumb-img" src="${item.thumb}" loading="lazy"></div>
-                <div class="video-meta">${item.prompt.substring(0, 50)}...</div>
+                ${isLooted ? '<div class="badge-looted">LOOTED</div>' : ''}
+                <div class="thumb-container">
+                    <img class="thumb-img" src="${item.thumb}" loading="lazy">
+                </div>
+                <div class="video-meta">${item.prompt}</div>
             `;
             feed.appendChild(card);
         });
     }
 
-    // 🔱 SELECTION LOGIC
+    // 🔱 SELECTION ENGINE
     function toggleSelect(id) {
         const item = masterData.find(m => m.id === id);
         const idx = queue.findIndex(q => q.id === id);
@@ -215,72 +227,70 @@
         renderView();
     }
 
-    // 🔱 V30: THE SEQUENTIAL STRIKE ENGINE (Memory Safe)
+    // 🔱 THE SERIAL STRIKER (MEM-SAFE DOWNLOADER)
     async function startSequentialStrike() {
-        if (queue.length === 0) return alert("पहले टार्गेट चुनें (Select All दबाएँ)!");
+        if (queue.length === 0) return alert("🔱 पहले टार्गेट चुनें (Select All दबाएँ)!");
         if (isAutoStriking) return;
         
         isAutoStriking = true;
         const overlay = document.getElementById('progress-overlay');
         const status = document.getElementById('pg-status');
         const fill = document.getElementById('pg-fill');
+        const percent = document.getElementById('pg-percent');
         
         overlay.style.display = 'flex';
-        requestWakeLock(); 
+        await requestWakeLock();
 
         for (let i = 0; i < queue.length; i++) {
             if (!isAutoStriking) break;
 
             const item = queue[i];
-            status.innerHTML = `🔱 SECURING ASSET ${i+1}/${queue.length}<br><span style="color:#fff">${item.prompt.substring(0,40)}...</span>`;
+            status.innerHTML = `🔱 STRIKING ASSET ${i+1}/${queue.length}<br><span style="color:#fff; font-size:10px;">${item.prompt.substring(0,40)}...</span>`;
 
             try {
                 // 1. Fetch File
                 const response = await fetch(item.clean);
-                if (!response.ok) throw "Link Dead";
+                if (!response.ok) throw "Dead Link";
                 const blob = await response.blob();
                 
                 // 2. Direct Browser Save
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `${item.prompt.substring(0,25).replace(/[^a-z0-9]/gi,'_')}.mp4`;
+                // Clean filename
+                const safeName = item.prompt.substring(0,30).replace(/[^a-z0-9]/gi,'_');
+                a.download = `GHOST_${safeName}_${item.id.substring(0,4)}.mp4`;
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
 
-                // 3. Mark in History
-                markAsLooted(item);
+                // 3. Update Local History
+                if (!lootedHistory.includes(item.id)) {
+                    lootedHistory.push(item.id);
+                    localStorage.setItem('ghost_looted_v30', JSON.stringify(lootedHistory));
+                }
 
             } catch (e) {
                 console.error("Strike Failed:", item.id);
                 status.innerHTML += `<br><span style="color:var(--dead)">⚠️ SKIPPED: LINK EXPIRED</span>`;
-                // Optional: Auto-delete from Firebase if dead
-                // deleteDeadLink(item);
+                await new Promise(r => setTimeout(r, 1000));
             }
 
             // Progress Update
             let p = Math.round(((i + 1) / queue.length) * 100);
             fill.style.width = p + '%';
-            document.getElementById('pg-percent').innerText = p + '%';
+            percent.innerText = p + '%';
 
-            // 4. Short Pause (Cooling)
+            // 4. Cool-down (Prevent browser throttling)
             await new Promise(r => setTimeout(r, 2000));
         }
 
         isAutoStriking = false;
         overlay.style.display = 'none';
         if (wakeLock) { wakeLock.release(); wakeLock = null; }
-        alert("🔱 MISSION COMPLETE: VAULT SECURED!");
-        refreshData();
-    }
-
-    function markAsLooted(item) {
-        if (!lootedHistory.includes(item.id)) {
-            lootedHistory.push(item.id);
-            localStorage.setItem('ghost_looted_v30', JSON.stringify(lootedHistory));
-        }
+        alert("🔱 MISSION ACCOMPLISHED: VAULT DATA SECURED!");
+        renderView();
     }
 
     function abortStrike() {
@@ -288,38 +298,44 @@
         location.reload();
     }
 
-    // 🔱 GUARDIAN MODE & WAKE LOCK
-    async function toggleGuardian() {
-        guardianActive = !guardianActive;
-        const btn = document.getElementById('guardian-btn');
-        const bar = document.getElementById('guardian-status-bar');
+    // 🔱 THE PURGE ENGINE (Silent cleaning)
+    async function purgeDeadLinks() {
+        if(!confirm("🔱 Start deep scan and purge dead links from Firebase?")) return;
         
-        if (guardianActive) {
-            btn.innerText = "🛡️ ACTIVE";
-            btn.classList.add('on');
-            bar.style.display = 'block';
-            requestWakeLock();
-            alert("Guardian Active: Staying awake for patrolling.");
-        } else {
-            btn.innerText = "🛡️ GUARDIAN";
-            btn.classList.remove('on');
-            bar.style.display = 'none';
-            if (wakeLock) { wakeLock.release(); wakeLock = null; }
+        const overlay = document.getElementById('progress-overlay');
+        const status = document.getElementById('pg-status');
+        overlay.style.display = 'flex';
+        
+        let deadCount = 0;
+        for (let i = 0; i < masterData.length; i++) {
+            const item = masterData[i];
+            status.innerText = `🔍 SCANNING: ${i+1}/${masterData.length} | DEAD: ${deadCount}`;
+            
+            try {
+                const res = await fetch(item.clean, { method: 'HEAD' });
+                if(!res.ok) throw "Dead";
+            } catch (e) {
+                deadCount++;
+                await fetch(`${VAULT_URL}/${item.dbPath}.json`, { method: 'DELETE' });
+            }
         }
-    }
-
-    async function requestWakeLock() {
-        try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
-    }
-
-    // 🔱 UTILITIES
-    function switchSpace() {
-        currentSpaceIdx = currentSpaceIdx === 0 ? 1 : 0;
-        document.getElementById('current-space-name').innerText = SPACES[currentSpaceIdx].name;
-        document.documentElement.style.setProperty('--neon', SPACES[currentSpaceIdx].color);
-        clearQueue();
+        
+        overlay.style.display = 'none';
+        alert(`🔱 PURGE COMPLETE: ${deadCount} dead links removed.`);
         refreshData();
     }
 
-    function exportLinks() {
-        const txt
+    // 🔱 WAKE LOCK (Keep screen alive)
+    async function requestWakeLock() {
+        try {
+            if ('wakeLock' in navigator) {
+                wakeLock = await navigator.wakeLock.request('screen');
+            }
+        } catch (err) { console.log("WakeLock failed"); }
+    }
+
+    // Initial Sync
+    refreshData();
+</script>
+</body>
+</html>
