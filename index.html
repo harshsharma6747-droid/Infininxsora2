@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🔱 G-GHOST | V30 SERIAL-STRIKER</title>
+    <title>🔱 G-GHOST | V33 OMNI-NITRO</title>
     <style>
         :root { 
             --bg: #030303; --card: #0d0d0d; --text: #ffffff; 
-            --neon: #00f2ff; --bomb: #bc13fe; --gold: #FFD700; 
+            --neon: #00f2ff; --nitro: #ff0055; --gold: #FFD700; 
             --live: #00ff41; --dead: #ff3131; --warn: #ffae00; 
         }
         
@@ -18,22 +18,23 @@
             overflow-x: hidden; -webkit-tap-highlight-color: transparent; 
         }
 
-        /* 🔱 Glow & Animations */
-        @keyframes pulse-glow { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-        .guardian-active { animation: pulse-glow 2s infinite; color: var(--warn); }
+        /* 🔱 Nitro & Glow Animations */
+        @keyframes pulse-nitro { 0% { box-shadow: 0 0 5px var(--nitro); } 50% { box-shadow: 0 0 25px var(--nitro); } 100% { box-shadow: 0 0 5px var(--nitro); } }
+        @keyframes flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .nitro-active { animation: pulse-nitro 1.5s infinite; border-color: var(--nitro) !important; }
 
         /* 🔱 Header & Status Bars */
         .app-bar { 
-            background: rgba(0,0,0,0.9); padding: 15px; 
+            background: rgba(0,0,0,0.95); padding: 15px; 
             display: flex; align-items: center; justify-content: space-between; 
             position: sticky; top: 0; z-index: 10000; 
-            border-bottom: 1px solid #222; backdrop-filter: blur(15px); 
+            border-bottom: 2px solid var(--nitro); backdrop-filter: blur(20px); 
         }
-        .logo { font-size: 20px; font-weight: 900; color: var(--neon); text-shadow: 0 0 10px var(--neon); }
+        .logo { font-size: 20px; font-weight: 900; color: var(--nitro); text-shadow: 0 0 10px var(--nitro); }
         
         #task-bar { 
-            background: #111; padding: 8px 15px; border-bottom: 1px solid #222; 
-            display: flex; font-size: 11px; color: #777; 
+            background: #0a0a0a; padding: 10px 15px; border-bottom: 1px solid #222; 
+            display: flex; font-size: 11px; color: #666; 
             justify-content: space-between; font-family: monospace; 
         }
 
@@ -45,33 +46,41 @@
             top: 55px; z-index: 9000; 
         }
         .p-btn { 
-            background: #151515; color: #fff; border: 1px solid #333; 
-            padding: 10px 18px; border-radius: 10px; font-size: 11px; 
+            background: #111; color: #fff; border: 1px solid #333; 
+            padding: 12px 20px; border-radius: 12px; font-size: 11px; 
             cursor: pointer; font-weight: bold; white-space: nowrap; 
             transition: 0.2s; display: flex; align-items: center; gap: 6px;
         }
         .p-btn:active { transform: scale(0.95); background: #222; }
-        .btn-strike { background: var(--neon); color: #000; border: none; font-weight: 900; }
-        .btn-bomb { border-color: var(--bomb); color: var(--bomb); }
+        .btn-strike { background: var(--nitro); color: #fff; border: none; font-weight: 900; box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); }
         .btn-danger { border-color: var(--dead); color: var(--dead); }
+
+        /* 🔱 Search Box */
+        .search-box { padding: 10px 15px; background: #000; }
+        #search-input { 
+            width: 100%; background: #0a0a0a; border: 1px solid #222; 
+            color: #fff; padding: 15px; border-radius: 12px; font-size: 14px;
+            outline: none; box-sizing: border-box; transition: 0.3s;
+        }
+        #search-input:focus { border-color: var(--neon); box-shadow: 0 0 10px rgba(0,242,255,0.2); }
 
         /* 🔱 Video Grid */
         #video-feed { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
             gap: 15px; padding: 15px; 
         }
         .video-card { 
             position: relative; background: var(--card); 
             border-radius: 14px; border: 2px solid #1a1a1a; 
-            overflow: hidden; transition: 0.3s; 
+            overflow: hidden; transition: 0.3s; cursor: pointer;
         }
         .video-card.selected { border-color: var(--neon); background: #111; box-shadow: 0 0 15px rgba(0,242,255,0.2); }
-        .video-card.is-looted { opacity: 0.4; filter: grayscale(0.8); }
+        .video-card.is-looted { opacity: 0.3; filter: grayscale(1); }
 
-        .thumb-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; cursor: pointer; }
+        .thumb-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
         .thumb-img { width: 100%; height: 100%; object-fit: cover; }
         
-        .video-meta { padding: 8px; font-size: 10px; color: #999; height: 32px; overflow: hidden; line-height: 1.2; }
+        .video-meta { padding: 10px; font-size: 10px; color: #888; height: 32px; overflow: hidden; line-height: 1.2; }
         
         .badge-looted { 
             position: absolute; top: 6px; left: 6px; 
@@ -79,24 +88,24 @@
             padding: 2px 6px; border-radius: 4px; font-weight: 900; z-index: 5; 
         }
 
-        /* 🔱 Progress Overlay */
+        /* 🔱 Progress Overlay (Nitro Styled) */
         #progress-overlay { 
             position: fixed; inset: 0; background: rgba(0,0,0,0.98); 
             z-index: 50000; display: none; flex-direction: column; 
-            align-items: center; justify-content: center; backdrop-filter: blur(20px); 
+            align-items: center; justify-content: center; backdrop-filter: blur(25px); 
         }
-        .pg-bar { width: 85%; background:#1a1a1a; height:8px; border-radius:10px; margin: 25px 0; overflow: hidden; }
-        .pg-fill { width: 0%; height: 100%; background: var(--neon); transition: 0.4s; box-shadow: 0 0 15px var(--neon); }
+        .pg-bar { width: 85%; background:#111; height:12px; border-radius:20px; margin: 30px 0; overflow: hidden; border: 1px solid #222; }
+        .pg-fill { 
+            width: 0%; height: 100%; 
+            background: linear-gradient(90deg, var(--neon), var(--nitro), var(--gold)); 
+            background-size: 200% 200%;
+            animation: flow 3s linear infinite;
+            box-shadow: 0 0 20px var(--nitro); 
+            transition: 0.2s;
+        }
         
-        #pg-percent { font-size: 70px; font-weight: 900; color: var(--neon); }
-        #pg-status { font-size: 12px; color: var(--gold); font-family: monospace; text-align: center; max-width: 80%; }
-
-        .search-box { padding: 10px 15px; background: #000; }
-        #search-input { 
-            width: 100%; background: #111; border: 1px solid #222; 
-            color: #fff; padding: 12px; border-radius: 12px; font-size: 14px;
-            outline: none; box-sizing: border-box;
-        }
+        #pg-percent { font-size: 100px; font-weight: 900; color: var(--nitro); font-style: italic; }
+        #pg-status { font-size: 12px; color: var(--neon); font-family: monospace; text-align: center; max-width: 85%; letter-spacing: 1px; }
 
         ::-webkit-scrollbar { display: none; }
     </style>
@@ -104,14 +113,15 @@
 <body>
 
 <div class="app-bar">
-    <div class="logo">🔱 G-GHOST <span style="font-size:10px; color:var(--gold)">V30 SERIAL</span></div>
+    <div class="logo">🔱 G-GHOST NITRO</div>
     <div style="display:flex; gap:10px;">
-        <button onclick="startSequentialStrike()" class="p-btn btn-strike">🚀 STRIKE (<span id="q-count">0</span>)</button>
+        <button onclick="startOmniStrike()" class="p-btn btn-strike">🚀 NITRO STRIKE (<span id="q-count">0</span>)</button>
     </div>
 </div>
 
 <div id="task-bar">
-    <span>🛰️ VAULT: <span id="vault-name" style="color:var(--neon)">BOMB-AA638</span></span>
+    <span>📡 IO_STATUS: <span id="io-stat" style="color:var(--live)">STABLE</span></span>
+    <span>⚡ MODE: <span style="color:var(--nitro)">HYPER-PARALLEL</span></span>
     <span id="asset-count" style="color:var(--gold)">0 ASSETS</span>
 </div>
 
@@ -123,7 +133,7 @@
     <button class="p-btn" onclick="refreshData()">🔄 SYNC VAULT</button>
     <button class="p-btn" onclick="selectAll()">✅ SELECT ALL</button>
     <button class="p-btn" onclick="clearQueue()">❌ CLEAR</button>
-    <button class="p-btn btn-danger" onclick="purgeDeadLinks()">💀 PURGE DEAD</button>
+    <button class="p-btn btn-danger" onclick="purgeDeadLinks()">💀 DEEP PURGE</button>
 </div>
 
 <div id="video-feed"></div>
@@ -131,8 +141,9 @@
 <div id="progress-overlay">
     <div id="pg-percent">0%</div>
     <div class="pg-bar"><div id="pg-fill" class="pg-fill"></div></div>
-    <p id="pg-status">INITIATING SERIAL DOWNLOAD SEQUENCE...</p>
-    <button class="p-btn btn-danger" style="margin-top:30px; padding:15px 40px;" onclick="abortStrike()">🛑 ABORT MISSION</button>
+    <p id="pg-status">INITIATING OMNI-STRIKE PROTOCOL...</p>
+    <div style="font-size:9px; color:#444; margin-bottom:20px;">CONCURRENCY_LIMIT: 10 | NO_LATENCY_MODE: ON</div>
+    <button class="p-btn btn-danger" style="padding:15px 50px;" onclick="abortStrike()">🛑 ABORT OPERATION</button>
 </div>
 
 <script>
@@ -140,11 +151,12 @@
     const VAULT_URL = "https://bomb-aa638-default-rtdb.firebaseio.com/sora_vault";
     let masterData = [];
     let queue = [];
-    let lootedHistory = JSON.parse(localStorage.getItem('ghost_looted_v30')) || [];
-    let isAutoStriking = false;
+    let lootedHistory = JSON.parse(localStorage.getItem('ghost_looted_v33')) || [];
+    let isStriking = false;
     let wakeLock = null;
+    const CONCURRENCY_LIMIT = 10; // 🔱 एक साथ 10 डाउनलोड (Nitro Mode)
 
-    // 🔱 DATA ENGINE
+    // 🔱 DATA ENGINE (V30 Logic)
     async function refreshData() {
         const statusText = document.getElementById('asset-count');
         statusText.innerText = "🛰️ SCANNING...";
@@ -174,32 +186,26 @@
             }
             if(data) traverse(data);
             masterData = tempStore.sort((a,b) => b.time - a.time);
-            statusText.innerText = `${masterData.length} ASSETS SECURED`;
+            statusText.innerText = `${masterData.length} SECURED`;
             renderView();
-        } catch (e) {
-            statusText.innerText = "❌ SYNC ERROR";
-        }
+        } catch (e) { statusText.innerText = "❌ ERROR"; }
     }
 
     function renderView() {
         const query = document.getElementById('search-input').value.toLowerCase();
         const feed = document.getElementById('video-feed');
         feed.innerHTML = "";
-        
         const filtered = query ? masterData.filter(i => i.prompt.toLowerCase().includes(query)) : masterData;
 
         filtered.forEach(item => {
             const isSelected = queue.some(q => q.id === item.id);
             const isLooted = lootedHistory.includes(item.id);
-            
             const card = document.createElement('div');
             card.className = `video-card ${isSelected ? 'selected' : ''} ${isLooted ? 'is-looted' : ''}`;
             card.onclick = () => toggleSelect(item.id);
             card.innerHTML = `
                 ${isLooted ? '<div class="badge-looted">LOOTED</div>' : ''}
-                <div class="thumb-container">
-                    <img class="thumb-img" src="${item.thumb}" loading="lazy">
-                </div>
+                <div class="thumb-container"><img class="thumb-img" src="${item.thumb}" loading="lazy"></div>
                 <div class="video-meta">${item.prompt}</div>
             `;
             feed.appendChild(card);
@@ -216,7 +222,7 @@
     }
 
     function selectAll() {
-        queue = [...masterData];
+        queue = [...masterData.filter(i => !lootedHistory.includes(i.id))];
         document.getElementById('q-count').innerText = queue.length;
         renderView();
     }
@@ -227,12 +233,12 @@
         renderView();
     }
 
-    // 🔱 THE SERIAL STRIKER (MEM-SAFE DOWNLOADER)
-    async function startSequentialStrike() {
-        if (queue.length === 0) return alert("🔱 पहले टार्गेट चुनें (Select All दबाएँ)!");
-        if (isAutoStriking) return;
+    // 🔱 OMNI-NITRO ENGINE (Hyper-Speed Parallel Downloads)
+    async function startOmniStrike() {
+        if (queue.length === 0) return alert("🔱 टार्गेट लॉक करें!");
+        if (isStriking) return;
         
-        isAutoStriking = true;
+        isStriking = true;
         const overlay = document.getElementById('progress-overlay');
         const status = document.getElementById('pg-status');
         const fill = document.getElementById('pg-fill');
@@ -241,67 +247,62 @@
         overlay.style.display = 'flex';
         await requestWakeLock();
 
-        for (let i = 0; i < queue.length; i++) {
-            if (!isAutoStriking) break;
+        let processed = 0;
+        const total = queue.length;
 
-            const item = queue[i];
-            status.innerHTML = `🔱 STRIKING ASSET ${i+1}/${queue.length}<br><span style="color:#fff; font-size:10px;">${item.prompt.substring(0,40)}...</span>`;
+        // कतार को बैचों में बांटना
+        for (let i = 0; i < total; i += CONCURRENCY_LIMIT) {
+            if (!isStriking) break;
+            
+            const batch = queue.slice(i, i + CONCURRENCY_LIMIT);
+            status.innerHTML = `🏎️ NITRO-PHASE: ${i+1} to ${Math.min(i + CONCURRENCY_LIMIT, total)} / ${total}<br>Siphoning Data Streams...`;
 
-            try {
-                // 1. Fetch File
-                const response = await fetch(item.clean);
-                if (!response.ok) throw "Dead Link";
-                const blob = await response.blob();
+            // बैच को एक साथ (Parallel) चलाना
+            await Promise.all(batch.map(async (item) => {
+                try {
+                    const res = await fetch(item.clean);
+                    if (!res.ok) throw "Dead";
+                    const blob = await res.blob();
+                    
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const safeName = item.prompt.substring(0,25).replace(/[^a-z0-9]/gi,'_');
+                    a.download = `NITRO_${safeName}_${item.id.substring(0,4)}.mp4`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    
+                    if (!lootedHistory.includes(item.id)) {
+                        lootedHistory.push(item.id);
+                    }
+                } catch (e) { console.log("Nitro-Skip:", item.id); }
                 
-                // 2. Direct Browser Save
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                // Clean filename
-                const safeName = item.prompt.substring(0,30).replace(/[^a-z0-9]/gi,'_');
-                a.download = `GHOST_${safeName}_${item.id.substring(0,4)}.mp4`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
+                processed++;
+                let p = Math.round((processed / total) * 100);
+                fill.style.width = p + '%';
+                percent.innerText = p + '%';
+            }));
 
-                // 3. Update Local History
-                if (!lootedHistory.includes(item.id)) {
-                    lootedHistory.push(item.id);
-                    localStorage.setItem('ghost_looted_v30', JSON.stringify(lootedHistory));
-                }
-
-            } catch (e) {
-                console.error("Strike Failed:", item.id);
-                status.innerHTML += `<br><span style="color:var(--dead)">⚠️ SKIPPED: LINK EXPIRED</span>`;
-                await new Promise(r => setTimeout(r, 1000));
-            }
-
-            // Progress Update
-            let p = Math.round(((i + 1) / queue.length) * 100);
-            fill.style.width = p + '%';
-            percent.innerText = p + '%';
-
-            // 4. Cool-down (Prevent browser throttling)
-            await new Promise(r => setTimeout(r, 2000));
+            // No latency break (Nitro Mode)
+            await new Promise(r => setTimeout(r, 100)); 
         }
 
-        isAutoStriking = false;
+        localStorage.setItem('ghost_looted_v33', JSON.stringify(lootedHistory));
+        isStriking = false;
         overlay.style.display = 'none';
         if (wakeLock) { wakeLock.release(); wakeLock = null; }
-        alert("🔱 MISSION ACCOMPLISHED: VAULT DATA SECURED!");
+        alert("🔱 VAULT SECURED AT NITRO SPEED!");
         renderView();
     }
 
     function abortStrike() {
-        isAutoStriking = false;
+        isStriking = false;
         location.reload();
     }
 
-    // 🔱 THE PURGE ENGINE (Silent cleaning)
+    // 🔱 DEEP PURGE (V30 Logic)
     async function purgeDeadLinks() {
-        if(!confirm("🔱 Start deep scan and purge dead links from Firebase?")) return;
-        
+        if(!confirm("🔱 Start deep purge from Firebase?")) return;
         const overlay = document.getElementById('progress-overlay');
         const status = document.getElementById('pg-status');
         overlay.style.display = 'flex';
@@ -310,7 +311,6 @@
         for (let i = 0; i < masterData.length; i++) {
             const item = masterData[i];
             status.innerText = `🔍 SCANNING: ${i+1}/${masterData.length} | DEAD: ${deadCount}`;
-            
             try {
                 const res = await fetch(item.clean, { method: 'HEAD' });
                 if(!res.ok) throw "Dead";
@@ -319,22 +319,16 @@
                 await fetch(`${VAULT_URL}/${item.dbPath}.json`, { method: 'DELETE' });
             }
         }
-        
         overlay.style.display = 'none';
-        alert(`🔱 PURGE COMPLETE: ${deadCount} dead links removed.`);
+        alert(`🔱 PURGE COMPLETE: ${deadCount} removed.`);
         refreshData();
     }
 
-    // 🔱 WAKE LOCK (Keep screen alive)
+    // 🔱 WAKE LOCK
     async function requestWakeLock() {
-        try {
-            if ('wakeLock' in navigator) {
-                wakeLock = await navigator.wakeLock.request('screen');
-            }
-        } catch (err) { console.log("WakeLock failed"); }
+        try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
     }
 
-    // Initial Sync
     refreshData();
 </script>
 </body>
