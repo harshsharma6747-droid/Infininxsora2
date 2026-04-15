@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🔱 G-GHOST | V33 OMNI-NITRO</title>
+    <title>🔱 G-GHOST | V34 STABLE-STRIKER</title>
     <style>
         :root { 
             --bg: #030303; --card: #0d0d0d; --text: #ffffff; 
-            --neon: #00f2ff; --nitro: #ff0055; --gold: #FFD700; 
+            --neon: #00f2ff; --bomb: #bc13fe; --gold: #FFD700; 
             --live: #00ff41; --dead: #ff3131; --warn: #ffae00; 
         }
         
@@ -18,19 +18,18 @@
             overflow-x: hidden; -webkit-tap-highlight-color: transparent; 
         }
 
-        /* 🔱 Nitro & Glow Animations */
-        @keyframes pulse-nitro { 0% { box-shadow: 0 0 5px var(--nitro); } 50% { box-shadow: 0 0 25px var(--nitro); } 100% { box-shadow: 0 0 5px var(--nitro); } }
-        @keyframes flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        .nitro-active { animation: pulse-nitro 1.5s infinite; border-color: var(--nitro) !important; }
+        /* 🔱 Glow & Stability Animations */
+        @keyframes pulse-glow { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        .stable-active { animation: pulse-glow 2s infinite; color: var(--neon); }
 
         /* 🔱 Header & Status Bars */
         .app-bar { 
             background: rgba(0,0,0,0.95); padding: 15px; 
             display: flex; align-items: center; justify-content: space-between; 
             position: sticky; top: 0; z-index: 10000; 
-            border-bottom: 2px solid var(--nitro); backdrop-filter: blur(20px); 
+            border-bottom: 2px solid var(--neon); backdrop-filter: blur(20px); 
         }
-        .logo { font-size: 20px; font-weight: 900; color: var(--nitro); text-shadow: 0 0 10px var(--nitro); }
+        .logo { font-size: 20px; font-weight: 900; color: var(--neon); text-shadow: 0 0 10px var(--neon); }
         
         #task-bar { 
             background: #0a0a0a; padding: 10px 15px; border-bottom: 1px solid #222; 
@@ -52,7 +51,7 @@
             transition: 0.2s; display: flex; align-items: center; gap: 6px;
         }
         .p-btn:active { transform: scale(0.95); background: #222; }
-        .btn-strike { background: var(--nitro); color: #fff; border: none; font-weight: 900; box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); }
+        .btn-strike { background: var(--neon); color: #000; border: none; font-weight: 900; box-shadow: 0 0 15px rgba(0,242,255,0.3); }
         .btn-danger { border-color: var(--dead); color: var(--dead); }
 
         /* 🔱 Search Box */
@@ -62,7 +61,6 @@
             color: #fff; padding: 15px; border-radius: 12px; font-size: 14px;
             outline: none; box-sizing: border-box; transition: 0.3s;
         }
-        #search-input:focus { border-color: var(--neon); box-shadow: 0 0 10px rgba(0,242,255,0.2); }
 
         /* 🔱 Video Grid */
         #video-feed { 
@@ -74,7 +72,7 @@
             border-radius: 14px; border: 2px solid #1a1a1a; 
             overflow: hidden; transition: 0.3s; cursor: pointer;
         }
-        .video-card.selected { border-color: var(--neon); background: #111; box-shadow: 0 0 15px rgba(0,242,255,0.2); }
+        .video-card.selected { border-color: var(--neon); background: #111; }
         .video-card.is-looted { opacity: 0.3; filter: grayscale(1); }
 
         .thumb-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
@@ -88,24 +86,22 @@
             padding: 2px 6px; border-radius: 4px; font-weight: 900; z-index: 5; 
         }
 
-        /* 🔱 Progress Overlay (Nitro Styled) */
+        /* 🔱 Progress Overlay */
         #progress-overlay { 
             position: fixed; inset: 0; background: rgba(0,0,0,0.98); 
             z-index: 50000; display: none; flex-direction: column; 
             align-items: center; justify-content: center; backdrop-filter: blur(25px); 
         }
-        .pg-bar { width: 85%; background:#111; height:12px; border-radius:20px; margin: 30px 0; overflow: hidden; border: 1px solid #222; }
+        .pg-bar { width: 85%; background:#111; height:10px; border-radius:20px; margin: 30px 0; overflow: hidden; border: 1px solid #222; }
         .pg-fill { 
             width: 0%; height: 100%; 
-            background: linear-gradient(90deg, var(--neon), var(--nitro), var(--gold)); 
-            background-size: 200% 200%;
-            animation: flow 3s linear infinite;
-            box-shadow: 0 0 20px var(--nitro); 
-            transition: 0.2s;
+            background: var(--neon);
+            box-shadow: 0 0 20px var(--neon); 
+            transition: 0.4s ease-out;
         }
         
-        #pg-percent { font-size: 100px; font-weight: 900; color: var(--nitro); font-style: italic; }
-        #pg-status { font-size: 12px; color: var(--neon); font-family: monospace; text-align: center; max-width: 85%; letter-spacing: 1px; }
+        #pg-percent { font-size: 80px; font-weight: 900; color: var(--neon); }
+        #pg-status { font-size: 12px; color: var(--gold); font-family: monospace; text-align: center; max-width: 85%; }
 
         ::-webkit-scrollbar { display: none; }
     </style>
@@ -113,15 +109,15 @@
 <body>
 
 <div class="app-bar">
-    <div class="logo">🔱 G-GHOST NITRO</div>
+    <div class="logo">🔱 G-GHOST STABLE</div>
     <div style="display:flex; gap:10px;">
-        <button onclick="startOmniStrike()" class="p-btn btn-strike">🚀 NITRO STRIKE (<span id="q-count">0</span>)</button>
+        <button onclick="startBatchStrike()" class="p-btn btn-strike">🚀 START STRIKE (<span id="q-count">0</span>)</button>
     </div>
 </div>
 
 <div id="task-bar">
-    <span>📡 IO_STATUS: <span id="io-stat" style="color:var(--live)">STABLE</span></span>
-    <span>⚡ MODE: <span style="color:var(--nitro)">HYPER-PARALLEL</span></span>
+    <span>📡 SYSTEM: <span style="color:var(--live)">BALANCED</span></span>
+    <span>⚡ BATCH_SIZE: <span style="color:var(--neon)">3</span></span>
     <span id="asset-count" style="color:var(--gold)">0 ASSETS</span>
 </div>
 
@@ -141,9 +137,9 @@
 <div id="progress-overlay">
     <div id="pg-percent">0%</div>
     <div class="pg-bar"><div id="pg-fill" class="pg-fill"></div></div>
-    <p id="pg-status">INITIATING OMNI-STRIKE PROTOCOL...</p>
-    <div style="font-size:9px; color:#444; margin-bottom:20px;">CONCURRENCY_LIMIT: 10 | NO_LATENCY_MODE: ON</div>
-    <button class="p-btn btn-danger" style="padding:15px 50px;" onclick="abortStrike()">🛑 ABORT OPERATION</button>
+    <p id="pg-status">INITIATING BALANCED STRIKE...</p>
+    <div style="font-size:9px; color:#444; margin-bottom:20px;">MODE: SEQUENTIAL_BATCH | LIMIT: 3</div>
+    <button class="p-btn btn-danger" style="padding:15px 50px;" onclick="abortStrike()">🛑 ABORT MISSION</button>
 </div>
 
 <script>
@@ -151,12 +147,12 @@
     const VAULT_URL = "https://bomb-aa638-default-rtdb.firebaseio.com/sora_vault";
     let masterData = [];
     let queue = [];
-    let lootedHistory = JSON.parse(localStorage.getItem('ghost_looted_v33')) || [];
+    let lootedHistory = JSON.parse(localStorage.getItem('ghost_looted_v34')) || [];
     let isStriking = false;
     let wakeLock = null;
-    const CONCURRENCY_LIMIT = 10; // 🔱 एक साथ 10 डाउनलोड (Nitro Mode)
+    const CONCURRENCY_LIMIT = 3; // 🔱 भाई की आज्ञा: एक बार में 3 का ही बैच
 
-    // 🔱 DATA ENGINE (V30 Logic)
+    // 🔱 DATA ENGINE
     async function refreshData() {
         const statusText = document.getElementById('asset-count');
         statusText.innerText = "🛰️ SCANNING...";
@@ -176,7 +172,7 @@
                                 id: key,
                                 dbPath: curPath,
                                 clean: vUrl,
-                                thumb: item.thumb || item.thumbnailUrl || 'https://via.placeholder.com/300x169/0d0d0d/333?text=G-GHOST',
+                                thumb: item.thumb || 'https://via.placeholder.com/300x169/0d0d0d/333?text=G-GHOST',
                                 prompt: item.prompt || 'Untitled_Asset',
                                 time: item.timestamp || 0
                             });
@@ -188,7 +184,7 @@
             masterData = tempStore.sort((a,b) => b.time - a.time);
             statusText.innerText = `${masterData.length} SECURED`;
             renderView();
-        } catch (e) { statusText.innerText = "❌ ERROR"; }
+        } catch (e) { statusText.innerText = "❌ SYNC ERROR"; }
     }
 
     function renderView() {
@@ -233,10 +229,9 @@
         renderView();
     }
 
-    // 🔱 OMNI-NITRO ENGINE (Hyper-Speed Parallel Downloads)
-    async function startOmniStrike() {
-        if (queue.length === 0) return alert("🔱 टार्गेट लॉक करें!");
-        if (isStriking) return;
+    // 🔱 STABLE BATCH ENGINE (3 Parallel Downloads)
+    async function startBatchStrike() {
+        if (queue.length === 0 || isStriking) return;
         
         isStriking = true;
         const overlay = document.getElementById('progress-overlay');
@@ -250,14 +245,13 @@
         let processed = 0;
         const total = queue.length;
 
-        // कतार को बैचों में बांटना
         for (let i = 0; i < total; i += CONCURRENCY_LIMIT) {
             if (!isStriking) break;
             
             const batch = queue.slice(i, i + CONCURRENCY_LIMIT);
-            status.innerHTML = `🏎️ NITRO-PHASE: ${i+1} to ${Math.min(i + CONCURRENCY_LIMIT, total)} / ${total}<br>Siphoning Data Streams...`;
+            status.innerHTML = `🔱 FORGING BATCH: ${i+1} to ${Math.min(i + CONCURRENCY_LIMIT, total)} of ${total}<br><span style="color:#fff">Stable Download Pipeline Active...</span>`;
 
-            // बैच को एक साथ (Parallel) चलाना
+            // 3 डाउनलोड्स एक साथ (Batch of 3)
             await Promise.all(batch.map(async (item) => {
                 try {
                     const res = await fetch(item.clean);
@@ -267,15 +261,15 @@
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    const safeName = item.prompt.substring(0,25).replace(/[^a-z0-9]/gi,'_');
-                    a.download = `NITRO_${safeName}_${item.id.substring(0,4)}.mp4`;
+                    const safeName = item.prompt.substring(0,30).replace(/[^a-z0-9]/gi,'_');
+                    a.download = `GHOST_${safeName}_${item.id.substring(0,4)}.mp4`;
                     a.click();
                     window.URL.revokeObjectURL(url);
                     
                     if (!lootedHistory.includes(item.id)) {
                         lootedHistory.push(item.id);
                     }
-                } catch (e) { console.log("Nitro-Skip:", item.id); }
+                } catch (e) { console.log("Skip:", item.id); }
                 
                 processed++;
                 let p = Math.round((processed / total) * 100);
@@ -283,15 +277,15 @@
                 percent.innerText = p + '%';
             }));
 
-            // No latency break (Nitro Mode)
-            await new Promise(r => setTimeout(r, 100)); 
+            // बैच के बीच 1.5 सेकंड का विश्राम (Cooling for iPad)
+            await new Promise(r => setTimeout(r, 1500)); 
         }
 
-        localStorage.setItem('ghost_looted_v33', JSON.stringify(lootedHistory));
+        localStorage.setItem('ghost_looted_v34', JSON.stringify(lootedHistory));
         isStriking = false;
         overlay.style.display = 'none';
         if (wakeLock) { wakeLock.release(); wakeLock = null; }
-        alert("🔱 VAULT SECURED AT NITRO SPEED!");
+        alert("🔱 MISSION COMPLETE: ASSETS SECURED SAFELY!");
         renderView();
     }
 
@@ -300,9 +294,9 @@
         location.reload();
     }
 
-    // 🔱 DEEP PURGE (V30 Logic)
+    // 🔱 DEEP PURGE
     async function purgeDeadLinks() {
-        if(!confirm("🔱 Start deep purge from Firebase?")) return;
+        if(!confirm("🔱 Start deep scan and delete dead links?")) return;
         const overlay = document.getElementById('progress-overlay');
         const status = document.getElementById('pg-status');
         overlay.style.display = 'flex';
